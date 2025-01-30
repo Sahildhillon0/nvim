@@ -150,5 +150,3 @@ For a full list of installed plugins, refer to the `init.lua` file.
 4. **Keymaps and Aliases**: Custom key mappings and aliases are defined to speed up your workflow. You can modify them to suit your needs.
 
 ---
-
-You can copy this Markdown code and save it as `README.md` in your repository. Let me know if you need further assistance!
