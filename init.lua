@@ -40,10 +40,6 @@ vim.cmd('hi SignColumn guibg=NONE ctermbg=NONE')
 --vim.cmd('hi StatusLineNC guibg=NONE ctermbg=NONE')
 
 
-require("core.keymaps")
---require("config.lsp")
-require("config.treesitter")
--- Set leader key
 --vim.g.mapleader = " "
 
 -- Auto-install lazy.nvim if not found
@@ -59,6 +55,9 @@ vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup("plugins")
 
-require("config.telescope")
+--require("config.telescope")
 
+require("core.keymaps")
+require("config.treesitter")
+-- Set leader key
 require("config.lsp")
