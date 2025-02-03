@@ -1,152 +1,133 @@
 # Neovim Configuration
 
-A customized Neovim configuration that I use.
+This is a Neovim configuration for a beginner who wants to set up a robust development environment with essential plugins, including `telescope.nvim` with the `fzf-native` extension for faster searching.
 
-## Table of Contents
-- [Installation](#installation)
-  - [Arch Linux](#arch-linux)
-  - [Other Linux Distributions](#other-linux-distributions)
-- [Keymaps](#keymaps)
-  - [General Keymaps](#general-keymaps)
-  - [Plugin Keymaps](#plugin-keymaps)
-- [Plugins](#plugins)
-- [Custom Configurations](#custom-configurations)
+## Prerequisites
+
+### 1. **Install Neovim**
+Ensure you have Neovim installed. If not, you can install it via your package manager:
+
+For Arch Linux:
+```bash
+sudo pacman -S neovim
+```
+
+### 2. **Install Required Dependencies**
+
+- **ripgrep**: Used by `telescope` for searching files efficiently.
+
+  ```bash
+  sudo pacman -S ripgrep
+  ```
+
+- **fzf**: Required for the `telescope-fzf-native.nvim` extension.
+
+  ```bash
+  sudo pacman -S fzf
+  ```
+
+### 3. **Install `lazy.nvim`**
+
+We'll be using `lazy.nvim` to manage plugins. If you don't have it installed yet, follow these steps:
+
+**Clone `lazy.nvim`** to your local Neovim configuration directory:
+
+  ```bash
+    git clone --filter=blob:none https://github.com/folke/lazy.nvim.git ~/.local/share/nvim/lazy/lazy.nvim
+  ```
+
+## Installing Plugins
+
+### `telescope.nvim` and `telescope-fzf-native.nvim`
+
+ **Run `:Lazy install` to Install the Plugins**:
+    In Neovim, run the following to install the plugins:
+
+  ```vim
+    :Lazy install
+  ```
 
 ---
 
-## Installation
+## Troubleshooting Plugin Errors
 
-### Arch Linux
+If you encounter errors, follow these steps:
 
-1. **Install Neovim**: First, make sure that Neovim is installed on your system.
-   ```bash
-   sudo pacman -S neovim
-   ```
+### 1. **Error: `module 'nvim-treesitter.configs' not found`**
 
-2. **Install Git**: You'll need `git` to clone the repository.
-   ```bash
-   sudo pacman -S git
-   ```
+- **Solution**: Install `nvim-treesitter`:
 
-3. **Clone the Repository**: Clone the repository into your Neovim configuration directory.
-   ```bash
-   git clone https://github.com/Sahildhillon0/nvim ~/.config/nvim
-   ```
+  In your `plugins.lua`, add:
 
-4. **Install Dependencies**: Install any required dependencies for the plugins and configuration. You can either use `vim-plug` or any plugin manager.
-   - If using `vim-plug`, run the following command inside Neovim:
+  ```lua
+  {
+    "nvim-treesitter/nvim-treesitter",
+    run = ":TSUpdate",
+  }
+  ```
+
+  Then run:
+  
+  ```vim
+  :Lazy sync
+  ```
+
+  After installation, you can set up Treesitter for code highlighting and more.
+
+---
+
+### 2. **Error: `fzf extension doesn't exist or isn't installed`**
+
+- **Solution**: Build the `fzf-native` extension manually if it wasn't built correctly.
+
+  1. Go to the plugin directory:
+
      ```bash
-     :PlugInstall
+     cd ~/.local/share/nvim/lazy/telescope-fzf-native.nvim
      ```
 
-5. **Set Neovim to Use the Configuration**: Ensure Neovim uses the configuration you just cloned.
-   ```bash
-   nvim
-   ```
+  2. Run the following to build the extension:
+
+     ```bash
+     make
+     ```
+
+  3. After that, reload Neovim and check again.
 
 ---
 
-### Other Linux Distributions
+## Key Bindings
 
-1. **Install Neovim**: Use your package manager to install Neovim. For example, on Ubuntu-based systems:
-   ```bash
-   sudo apt install neovim
-   ```
+Once everything is set up, you can use `Telescope` with keybindings. For example, you can bind `Telescope` commands to your preferred keys:
 
-2. **Install Git**:
-   ```bash
-   sudo apt install git
-   ```
-
-3. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/Sahildhillon0/nvim ~/.config/nvim
-   ```
-
-4. **Install Dependencies**: Use a plugin manager like `vim-plug` to install plugins.
-   ```bash
-   nvim
-   :PlugInstall
-   ```
+```lua
+-- Example keybindings for Telescope
+vim.api.nvim_set_keymap('n', '<leader>ff', ':Telescope find_files<CR>', { noremap = true })
+vim.api.nvim_set_keymap('n', '<leader>fg', ':Telescope live_grep<CR>', { noremap = true })
+```
 
 ---
 
-## Keymaps
+## Final Steps
 
-### General Keymaps
+1. **Sync and Update Plugins**:
 
-- **Normal Mode**:
-  - `:w` : Save the current file.
-  - `:q` : Quit Neovim.
-  - `:wq` : Save and quit Neovim.
-  - `:x` : Save and exit (equivalent to `:wq`).
-  - `u` : Undo the last action.
-  - `Ctrl + r` : Redo the last undone action.
-  - `dd` : Delete the current line.
-  - `yy` : Copy the current line.
-  - `p` : Paste after the cursor.
-  - `P` : Paste before the cursor.
-  
-- **Visual Mode**:
-  - `v` : Enter visual mode (select characters).
-  - `V` : Enter line-wise visual mode.
-  - `Ctrl + v` : Enter block visual mode (select a block).
-  - `y` : Yank (copy) the selected text.
-  - `d` : Delete the selected text.
-  
-- **Insert Mode**:
-  - `i` : Enter insert mode at the current cursor position.
-  - `I` : Enter insert mode at the beginning of the current line.
-  - `a` : Enter insert mode after the current cursor position.
-  - `A` : Enter insert mode at the end of the current line.
-  
-- **Command Mode**:
-  - `:` : Open command-line mode to enter commands.
-  - `:help` : Open help for a specific command.
+   After everything is set up, make sure all your plugins are synced and updated:
 
-### Plugin Keymaps
+   ```
+   :Lazy sync
+   ```
 
-- **Telescope** (File Finder):
-  - `<Leader>ff` : Find files.
-  - `<Leader>fg` : Live grep (search text in files).
-  - `<Leader>fb` : Find buffers.
-  - `<Leader>fh` : Find help tags.
-  
-- **NerdTree** (File Explorer):
-  - `<Leader>e` : Toggle the file explorer.
-  
-- **LSP (Language Server Protocol)**:
-  - `gd` : Go to definition.
-  - `gr` : Go to references.
-  - `gi` : Go to implementation.
-  - `K` : Show documentation for the symbol under the cursor.
-  
-- **Autocomplete** (Using `nvim-cmp`):
-  - `Tab` : Complete the current word.
-  - `Shift + Tab` : Go to the previous completion suggestion.
+2. **Restart Neovim**:
 
----
+   After the plugins are installed and the setup is complete, restart Neovim to make sure everything is loaded properly.
 
-## Plugins
+3. **Check Health**:
 
-- **telescope.nvim**: A fuzzy finder for files, buffers, and more.
-- **nvim-tree.lua**: A fast file explorer with support for Git, buffers, and more.
-- **nvim-lspconfig**: Easily configure LSP (Language Server Protocol) in Neovim.
-- **nvim-cmp**: A completion plugin for autocomplete functionality.
-- **treesitter**: Better syntax highlighting and code understanding.
+   If you want to check for any issues with your Neovim setup, you can use:
 
-For a full list of installed plugins, refer to the `init.lua` file.
-
----
-
-## Custom Configurations
-
-1. **Themes**: The configuration includes a dark theme with support for popular color schemes. You can modify or change the theme by editing the `colorscheme` line in the `init.lua`.
-
-2. **Autocompletion**: Using `nvim-cmp`, the config sets up autocomplete for various languages, making coding faster and easier.
-
-3. **LSP**: The configuration enables Language Server Protocol for languages like Python, JavaScript, Go, etc. Ensure that the necessary language servers are installed.
-
-4. **Keymaps and Aliases**: Custom key mappings and aliases are defined to speed up your workflow. You can modify them to suit your needs.
+   ```vim
+   :checkhealth
+   ```
 
 ---
