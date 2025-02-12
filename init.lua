@@ -29,19 +29,6 @@ vim.opt.clipboard = "unnamedplus"
 vim.opt.splitright = true
 vim.opt.splitbelow = true
 
-
--- Set transparent background
-vim.cmd('colorscheme default')
-vim.cmd('hi Normal guibg=NONE ctermbg=NONE')
-vim.cmd('hi NormalNC guibg=NONE ctermbg=NONE')
-vim.cmd('hi SignColumn guibg=NONE ctermbg=NONE')
---vim.cmd('hi VertSplit guibg=NONE ctermbg=NONE')
---vim.cmd('hi StatusLine guibg=NONE ctermbg=NONE')
---vim.cmd('hi StatusLineNC guibg=NONE ctermbg=NONE')
-
-
---vim.g.mapleader = " "
-
 -- Auto-install lazy.nvim if not found
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -54,10 +41,10 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup("plugins")
-
 --require("config.telescope")
 
 require("core.keymaps")
 require("config.treesitter")
+require("config.colorscheme")
 -- Set leader key
 require("config.lsp")
