@@ -1,50 +1,89 @@
--- Set leader key
-vim.g.mapleader = " "
 
--- Line numbers
+-- Advent of Neovim
+print("advent of neovim")
+
+require("config.lazy")
+
+vim.opt.shiftwidth = 4
+vim.opt.clipboard = "unnamedplus"
 vim.opt.number = true
 vim.opt.relativenumber = true
 
--- Indentation
-vim.opt.expandtab = true
-vim.opt.shiftwidth = 4
-vim.opt.tabstop = 4
-vim.opt.smartindent = true
+-- Custom Keymaps
+-- Source current file (for Lua config)
+vim.keymap.set("n", "<space><space>x", "<cmd>source %<CR>")
+vim.keymap.set("n", "<space>x", ":.lua<CR>")
+vim.keymap.set("v", "<space>x", ":lua<CR>")
 
--- Search settings
-vim.opt.ignorecase = true
-vim.opt.smartcase = true
+-- Quickfix navigation
+vim.keymap.set("n", "<M-j>", "<cmd>cnext<CR>")
+vim.keymap.set("n", "<M-k>", "<cmd>cprev<CR>")
 
--- Disable swap files
-vim.opt.swapfile = false
-vim.opt.backup = false
+-- Highlight when yanking (copying) text
+vim.api.nvim_create_autocmd("TextYankPost", {
+  desc = "Highlight when yanking (copying) text",
+  group = vim.api.nvim_create_augroup("kickstart-highlight-yank", { clear = true }),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+})
 
--- Enable mouse support
-vim.opt.mouse = "a"
+-- Disable line numbers in terminal buffers
+vim.api.nvim_create_autocmd("TermOpen", {
+  group = vim.api.nvim_create_augroup("custom-term-open", { clear = true }),
+  callback = function()
+    vim.opt.number = false
+    vim.opt.relativenumber = false
+  end,
+})
 
--- Clipboard
-vim.opt.clipboard = "unnamedplus"
+-- Terminal mappings for new terminal window and sending commands
+local job_id = 0
+vim.keymap.set("n", "<space>to", function()
+  vim.cmd.vnew()
+  vim.cmd.term()
+  vim.cmd.wincmd("J")
+  vim.api.nvim_win_set_height(0, 5)
 
--- Split window behavior
-vim.opt.splitright = true
-vim.opt.splitbelow = true
+  job_id = vim.bo.channel
+end)
 
--- Auto-install lazy.nvim if not found
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-if not vim.loop.fs_stat(lazypath) then
-    vim.fn.system({
-        "git", "clone", "--filter=blob:none",
-        "https://github.com/folke/lazy.nvim.git",
-        "--branch=stable", lazypath,
-    })
-end
-vim.opt.rtp:prepend(lazypath)
+local current_command = ""
+vim.keymap.set("n", "<space>te", function()
+  current_command = vim.fn.input("Command: ")
+end)
 
-require("lazy").setup("plugins")
---require("config.telescope")
+vim.keymap.set("n", "<space>tr", function()
+  if current_command == "" then
+    current_command = vim.fn.input("Command: ")
+  end
 
-require("core.keymaps")
-require("config.treesitter")
-require("config.colorscheme")
--- Set leader key
-require("config.lsp")
+  vim.fn.chansend(job_id, { current_command .. "\r\n" })
+end)
+
+vim.keymap.set("n", "-", "<cmd>Oil<CR>")
+
+-- New Keymaps
+
+-- File Explorer
+vim.keymap.set("n", "<leader>pv", ":Oil<CR>") -- Open file explorer
+
+-- Quick exit from insert mode
+vim.keymap.set("i", "jk", "<Esc>")  -- Exit insert mode quickly
+
+-- Window navigation
+vim.keymap.set("n", "<C-h>", "<C-w>h")  -- Move to the left window
+vim.keymap.set("n", "<C-l>", "<C-w>l")  -- Move to the right window
+vim.keymap.set("n", "<C-j>", "<C-w>j")  -- Move to the bottom window
+vim.keymap.set("n", "<C-k>", "<C-w>k")  -- Move to the top window
+
+-- Set transparent background
+vim.cmd("hi Normal guibg=NONE ctermbg=NONE")  -- Sets the background of normal text to transparent
+vim.cmd("hi NormalNC guibg=NONE ctermbg=NONE")  -- Sets the background of inactive windows to transparent
+vim.cmd("hi VertSplit guibg=NONE ctermbg=NONE")  -- Makes the vertical split line transparent
+vim.cmd("hi StatusLine guibg=NONE ctermbg=NONE")  -- Sets the status line background to transparent
+vim.cmd("hi TabLine guibg=NONE ctermbg=NONE")  -- Makes the tabline transparent
+
+-- Optional: Set transparent background for floating windows (e.g., popups)
+vim.cmd("hi FloatBorder guibg=NONE ctermbg=NONE")
+
