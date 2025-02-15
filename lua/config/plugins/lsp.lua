@@ -1,3 +1,4 @@
+
 return {
   {
     "neovim/nvim-lspconfig",
@@ -14,24 +15,71 @@ return {
     },
     config = function()
       local capabilities = require('blink.cmp').get_lsp_capabilities()
-      require("lspconfig").lua_ls.setup { capabilites = capabilities }
 
-      vim.api.nvim_create_autocmd('LspAttach', {
-        callback = function(args)
-          local c = vim.lsp.get_client_by_id(args.data.client_id)
-          if not c then return end
+      -- Set up Lua LSP
+      require("lspconfig").lua_ls.setup {
+        capabilities = capabilities,
+      }
 
-          if vim.bo.filetype == "lua" then
-            -- Format the current buffer on save
-            vim.api.nvim_create_autocmd('BufWritePre', {
-              buffer = args.buf,
-              callback = function()
-                vim.lsp.buf.format({ bufnr = args.buf, id = c.id })
-              end,
-            })
+      -- Set up C LSP (clangd)
+      require("lspconfig").clangd.setup {
+        capabilities = capabilities,
+      }
+
+      -- Set up Python LSP (pyright)
+      require("lspconfig").pyright.setup {
+        capabilities = capabilities,
+      }
+
+      -- Set up Rust LSP (rust-analyzer)
+      require("lspconfig").rust_analyzer.setup {
+        capabilities = capabilities,
+      }
+
+      -- Set up Java LSP (jdtls)
+      require("lspconfig").jdtls.setup {
+        capabilities = capabilities,
+      }
+
+      -- Set up Makefile LSP (bashls)
+      require("lspconfig").bashls.setup {
+        capabilities = capabilities,
+      }
+
+      -- Set up Markdown LSP (remark_lsp)
+      require("lspconfig").remark_ls.setup {
+        capabilities = capabilities,
+      }
+
+      -- Set up other LSPs similarly for each language...
+
+      -- Show diagnostics only in normal mode
+      vim.api.nvim_create_autocmd({'InsertEnter', 'InsertLeave'}, {
+        callback = function()
+          -- If we're in Insert mode, clear the diagnostics
+          if vim.fn.mode() == 'i' then
+            vim.diagnostic.hide()
+          else
+            -- If we're in Normal mode, show diagnostics
+            vim.diagnostic.show()
+          end
+        end,
+      })
+
+      -- Trigger LSP formatting only on exiting Insert mode
+      vim.api.nvim_create_autocmd('InsertLeave', {
+        callback = function()
+          -- Run the formatting if necessary (for example, on Lua files)
+          local bufnr = vim.api.nvim_get_current_buf()
+          local filetype = vim.bo[bufnr].filetype
+
+          -- Trigger LSP formatting only if in Normal mode and filetype matches
+          if vim.fn.mode() == 'n' and filetype == 'lua' then
+            vim.lsp.buf.format({ bufnr = bufnr })
           end
         end,
       })
     end,
   }
 }
+
