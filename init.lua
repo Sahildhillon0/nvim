@@ -8,6 +8,7 @@ vim.opt.shiftwidth = 4
 vim.opt.clipboard = "unnamedplus"
 vim.opt.number = true
 vim.opt.relativenumber = true
+vim.opt.scrolloff = 8
 
 -- Custom Keymaps
 -- Source current file (for Lua config)
@@ -64,6 +65,9 @@ end)
 vim.keymap.set("n", "-", "<cmd>Oil<CR>")
 
 -- New Keymaps
+vim.keymap.set("n", "<leader>s", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]])
+vim.keymap.set("c", "W", "w")
+vim.keymap.set("c", "Q", "q")
 
 -- File Explorer
 vim.keymap.set("n", "<leader>pv", ":Oil<CR>") -- Open file explorer
