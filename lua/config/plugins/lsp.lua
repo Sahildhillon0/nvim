@@ -1,4 +1,3 @@
-
 return {
   {
     "neovim/nvim-lspconfig",
@@ -12,74 +11,100 @@ return {
           },
         },
       },
+      {
+        "simrat39/rust-tools.nvim",
+        config = function()
+          local capabilities = require('blink.cmp').get_lsp_capabilities()
+          local rt = require("rust-tools")
+
+          rt.setup({
+            server = {
+              capabilities = capabilities,
+              on_attach = function(_, bufnr)
+                -- Format Rust on save
+                vim.api.nvim_create_autocmd("BufWritePre", {
+                  buffer = bufnr,
+                  callback = function()
+                    vim.lsp.buf.format({ async = false })
+                  end,
+                })
+              end,
+            },
+          })
+        end,
+      },
     },
     config = function()
+      local lspconfig = require("lspconfig")
       local capabilities = require('blink.cmp').get_lsp_capabilities()
 
-      -- Set up Lua LSP
-      require("lspconfig").lua_ls.setup {
+      -- Set up LSPs
+      lspconfig.lua_ls.setup {
         capabilities = capabilities,
       }
 
-      -- Set up C LSP (clangd)
-      require("lspconfig").clangd.setup {
+      lspconfig.clangd.setup {
         capabilities = capabilities,
       }
 
-      -- Set up Python LSP (pyright)
-      require("lspconfig").pyright.setup {
+      lspconfig.pyright.setup {
         capabilities = capabilities,
       }
 
-      -- Set up Rust LSP (rust-analyzer)
-      require("lspconfig").rust_analyzer.setup {
+      -- rust-analyzer is handled by rust-tools, no need to set it up here
+
+      lspconfig.jdtls.setup {
         capabilities = capabilities,
       }
 
-      -- Set up Java LSP (jdtls)
-      require("lspconfig").jdtls.setup {
+      lspconfig.bashls.setup {
         capabilities = capabilities,
       }
 
-      -- Set up Makefile LSP (bashls)
-      require("lspconfig").bashls.setup {
+      lspconfig.remark_ls.setup {
         capabilities = capabilities,
       }
 
-      -- Set up Markdown LSP (remark_lsp)
-      require("lspconfig").remark_ls.setup {
-        capabilities = capabilities,
-      }
+      -- Diagnostics config: show inline + float
+      vim.diagnostic.config({
+        virtual_text = true,
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+      })
 
-      -- Set up other LSPs similarly for each language...
+      -- Automatically show diagnostic in float on CursorHold
+      vim.o.updatetime = 300
+      vim.cmd [[
+        autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
+      ]]
 
-      -- Show diagnostics only in normal mode
-      vim.api.nvim_create_autocmd({'InsertEnter', 'InsertLeave'}, {
+      -- Toggle diagnostics when entering/leaving insert mode
+      vim.api.nvim_create_autocmd({ 'InsertEnter', 'InsertLeave' }, {
         callback = function()
-          -- If we're in Insert mode, clear the diagnostics
           if vim.fn.mode() == 'i' then
             vim.diagnostic.hide()
           else
-            -- If we're in Normal mode, show diagnostics
             vim.diagnostic.show()
           end
         end,
       })
 
-      -- Trigger LSP formatting only on exiting Insert mode
-      vim.api.nvim_create_autocmd('InsertLeave', {
+      -- Autoformat Lua on insert leave
+      vim.api.nvim_create_autocmd("InsertLeave", {
         callback = function()
-          -- Run the formatting if necessary (for example, on Lua files)
           local bufnr = vim.api.nvim_get_current_buf()
-          local filetype = vim.bo[bufnr].filetype
-
-          -- Trigger LSP formatting only if in Normal mode and filetype matches
-          if vim.fn.mode() == 'n' and filetype == 'lua' then
+          local ft = vim.bo[bufnr].filetype
+          if ft == "lua" and vim.fn.mode() == "n" then
             vim.lsp.buf.format({ bufnr = bufnr })
           end
         end,
       })
+
+      -- Keymap: show diagnostic float
+      vim.keymap.set("n", "K", vim.diagnostic.open_float, { desc = "Show diagnostics under cursor" })
     end,
-  }
+  },
 }
 
