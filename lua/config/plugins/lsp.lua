@@ -2,9 +2,10 @@ return {
   {
     "neovim/nvim-lspconfig",
     dependencies = {
-      'saghen/blink.cmp',
+      "saghen/blink.cmp",
       {
         "folke/lazydev.nvim",
+        ft = "lua",
         opts = {
           library = {
             { path = "${3rd}/luv/library", words = { "vim%.uv" } },
@@ -12,16 +13,17 @@ return {
         },
       },
       {
-        "simrat39/rust-tools.nvim",
-        config = function()
-          local capabilities = require('blink.cmp').get_lsp_capabilities()
-          local rt = require("rust-tools")
-
-          rt.setup({
+        "mrcjkb/rustaceanvim",
+        version = "^7",  -- Latest as of Dec 2025
+        ft = { "rust" },  -- Lazy-load on .rs files
+        init = function()
+          vim.g.rustaceanvim = {
             server = {
-              capabilities = capabilities,
-              on_attach = function(_, bufnr)
-                -- Format Rust on save
+              capabilities = function()
+                return require("blink.cmp").get_lsp_capabilities()
+              end,
+              on_attach = function(client, bufnr)
+                -- Format on save for Rust
                 vim.api.nvim_create_autocmd("BufWritePre", {
                   buffer = bufnr,
                   callback = function()
@@ -29,43 +31,32 @@ return {
                   end,
                 })
               end,
+              default_settings = {
+                ["rust-analyzer"] = {
+                  cargo = { allFeatures = true },
+                  check = { command = "clippy" },
+                  procMacro = { enable = true },
+                },
+              },
             },
-          })
+          }
         end,
       },
     },
     config = function()
-      local lspconfig = require("lspconfig")
-      local capabilities = require('blink.cmp').get_lsp_capabilities()
+      local capabilities = require("blink.cmp").get_lsp_capabilities()
 
-      -- Set up LSPs
-      lspconfig.lua_ls.setup {
-        capabilities = capabilities,
-      }
+      -- Modern native API (no require("lspconfig") → no deprecation warning)
+      vim.lsp.config("lua_ls", { capabilities = capabilities })
+      vim.lsp.config("clangd", { capabilities = capabilities })
+      vim.lsp.config("pyright", { capabilities = capabilities })
+      vim.lsp.config("jdtls", { capabilities = capabilities })
+      vim.lsp.config("bashls", { capabilities = capabilities })
+      vim.lsp.config("remark_ls", { capabilities = capabilities })
 
-      lspconfig.clangd.setup {
-        capabilities = capabilities,
-      }
+      vim.lsp.enable({ "lua_ls", "clangd", "pyright", "jdtls", "bashls", "remark_ls" })
 
-      lspconfig.pyright.setup {
-        capabilities = capabilities,
-      }
-
-      -- rust-analyzer is handled by rust-tools, no need to set it up here
-
-      lspconfig.jdtls.setup {
-        capabilities = capabilities,
-      }
-
-      lspconfig.bashls.setup {
-        capabilities = capabilities,
-      }
-
-      lspconfig.remark_ls.setup {
-        capabilities = capabilities,
-      }
-
-      -- Diagnostics config: show inline + float
+      -- Your diagnostics + other settings (unchanged)
       vim.diagnostic.config({
         virtual_text = true,
         signs = true,
@@ -74,16 +65,12 @@ return {
         severity_sort = true,
       })
 
-      -- Automatically show diagnostic in float on CursorHold
       vim.o.updatetime = 300
-      vim.cmd [[
-        autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
-      ]]
+      vim.cmd([[autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })]])
 
-      -- Toggle diagnostics when entering/leaving insert mode
-      vim.api.nvim_create_autocmd({ 'InsertEnter', 'InsertLeave' }, {
+      vim.api.nvim_create_autocmd({ "InsertEnter", "InsertLeave" }, {
         callback = function()
-          if vim.fn.mode() == 'i' then
+          if vim.fn.mode() == "i" then
             vim.diagnostic.hide()
           else
             vim.diagnostic.show()
@@ -91,7 +78,6 @@ return {
         end,
       })
 
-      -- Autoformat Lua on insert leave
       vim.api.nvim_create_autocmd("InsertLeave", {
         callback = function()
           local bufnr = vim.api.nvim_get_current_buf()
@@ -102,9 +88,7 @@ return {
         end,
       })
 
-      -- Keymap: show diagnostic float
       vim.keymap.set("n", "K", vim.diagnostic.open_float, { desc = "Show diagnostics under cursor" })
     end,
   },
 }
-
