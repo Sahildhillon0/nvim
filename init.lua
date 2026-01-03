@@ -88,6 +88,3 @@ vim.cmd("hi VertSplit guibg=NONE ctermbg=NONE")  -- Makes the vertical split lin
 vim.cmd("hi StatusLine guibg=NONE ctermbg=NONE")  -- Sets the status line background to transparent
 vim.cmd("hi TabLine guibg=NONE ctermbg=NONE")  -- Makes the tabline transparent
 
--- Optional: Set transparent background for floating windows (e.g., popups)
-vim.cmd("hi FloatBorder guibg=NONE ctermbg=NONE")
-
