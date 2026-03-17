@@ -10,3 +10,16 @@ lspconfig.rust_analyzer.setup({
     },
   },
 })
+
+-- JavaScript / TypeScript
+lspconfig.tsserver.setup({})
+
+-- C / C++
+lspconfig.clangd.setup({
+  cmd = {
+    "clangd",
+    "--background-index",
+    "--clang-tidy",
+    "--completion-style=detailed",
+  },
+})
